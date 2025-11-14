@@ -19,14 +19,25 @@ public class FileSystemManager {
     private boolean[] freeBlockList; // Bitmap for free blocks
 
     public FileSystemManager(String filename, int totalSize) {
-        // Initialize the file system manager with a file
-        if(instance == null) {
-            //TODO Initialize the file system
-        } else {
-            throw new IllegalStateException("FileSystemManager is already initialized.");
+   try {
+        RandomAccessFile d = new RandomAccessFile(filename, "rw");
+
+
+        d.setLength(totalSize);
+
+        this.disk = d;
+
+        inodeTable = new FEntry[MAXFILES];
+        freeBlockList = new boolean[MAXBLOCKS];
+
+        for (int i = 0; i < MAXBLOCKS; i++) {
+            freeBlockList[i] = true;
         }
 
+    } catch (IOException e) {
+        throw new RuntimeException("Failed to initialize file system", e);
     }
+}
 
     public void createFile(String fileName) throws Exception {
         // TODO
