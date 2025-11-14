@@ -40,13 +40,29 @@ public class FileSystemManager {
 }
 
     public void createFile(String fileName) throws Exception {
-        // TODO
         throw new UnsupportedOperationException("Method not implemented yet.");
     }
 
 
-    // TODO: Add readFile, writeFile and other required methods,
 }
+private int allocateBlock() {
+    for (int i = 0; i < MAXBLOCKS; i++) {
+        if (freeBlockList[i]) {      
+            freeBlockList[i] = false; 
+            return i;
+        }
+    }
+    return -1; 
+}
+
+
+private int blocksForSize(int size) {
+    if (size <= 0) {
+        return 0;
+    }
+    return (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
+}
+
 private void freeBlocksForFile(FEntry entry) {
     if (entry == null) {
         return;
