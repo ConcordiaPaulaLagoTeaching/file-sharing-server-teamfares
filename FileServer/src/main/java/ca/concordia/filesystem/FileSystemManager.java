@@ -47,3 +47,23 @@ public class FileSystemManager {
 
     // TODO: Add readFile, writeFile and other required methods,
 }
+private void freeBlocksForFile(FEntry entry) {
+    if (entry == null) {
+        return;
+    }
+    short first = entry.getFirstBlock();
+    short size = entry.getFilesize();
+
+    if (first < 0 || size <= 0) {
+        return;
+    }
+
+    int blocksUsed = blocksForSize(size);
+
+    for (int k = 0; k < blocksUsed; k++) {
+        int blockIndex = first + k;
+        if (blockIndex >= 0 && blockIndex < MAXBLOCKS) {
+            freeBlockList[blockIndex] = true;
+        }
+    }
+}
