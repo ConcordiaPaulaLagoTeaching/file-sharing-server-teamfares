@@ -55,12 +55,43 @@ private int allocateBlock() {
     return -1; 
 }
 
+private int findFreeInodeIndex() {
+    for (int i = 0; i < MAXFILES; i++) {
+        if (inodeTable[i] == null) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 private int blocksForSize(int size) {
     if (size <= 0) {
         return 0;
     }
     return (size + BLOCK_SIZE - 1) / BLOCK_SIZE;
+}
+private int[] allocateBlocks(int count) throws Exception {
+    if (count <= 0) {
+        return new int[0];
+    }
+
+    int[] blocks = new int[count];
+    int allocatedSoFar = 0;
+
+    for (int i = 0; i < count; i++) {
+        int b = allocateBlock();
+        if (b == -1) {
+            // rollback previously allocated
+            for (int j = 0; j < allocatedSoFar; j++) {
+                freeBlockList[blocks[j]] = true;
+            }
+            throw new Exception("Not enough space for file");
+        }
+        blocks[i] = b;
+        allocatedSoFar++;
+    }
+
+    return blocks;
 }
 
 private void freeBlocksForFile(FEntry entry) {
