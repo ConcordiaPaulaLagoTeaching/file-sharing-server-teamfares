@@ -7,7 +7,10 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class FileServer {
+public class FileServer(int port, String fileSystemName, int totalSize) {
+    this.fsManager = new FileSystemManager(fileSystemName, totalSize);
+        this.port = port;
+    }
 
     private FileSystemManager fsManager;
     private int port;
@@ -42,7 +45,35 @@ public class FileServer {
                                 writer.println("SUCCESS: File '" + parts[1] + "' created.");
                                 writer.flush();
                                 break;
-                            //TODO: Implement other commands READ, WRITE, DELETE, LIST
+                        }
+                         String filename = parts[1];
+                                try {
+                                    fsManager.createFile(filename);
+                                    writer.println("SUCCESS: File '" + filename + "' created.");
+                                } catch (Exception ex) {
+                                    writer.println("ERROR: " + ex.getMessage());
+                                }
+                                break;
+                            }
+                           case "WRITE": {
+                                writer.println("ERROR: WRITE not implemented yet.");
+                                break;  
+                        
+                            case "READ": {
+                                
+                                writer.println("ERROR: READ not implemented yet.");
+                                break;
+                            }
+                              case "DELETE": {
+                                writer.println("ERROR: DELETE not implemented yet.");
+                                break;
+                            }
+
+                            case "LIST": {
+                                writer.println("ERROR: LIST not implemented yet.");
+                                break;
+                            }
+
                             case "QUIT":
                                 writer.println("SUCCESS: Disconnecting.");
                                 return;

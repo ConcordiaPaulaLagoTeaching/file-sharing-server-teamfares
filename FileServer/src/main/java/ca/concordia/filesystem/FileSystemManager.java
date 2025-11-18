@@ -1,7 +1,7 @@
 package ca.concordia.filesystem;
 
 import ca.concordia.filesystem.datastructures.FEntry;
-
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -38,12 +38,30 @@ public class FileSystemManager {
         throw new RuntimeException("Failed to initialize file system", e);
     }
 }
+public void createFile(String fileName) throws Exception {
+    globalLock.lock();
+    try {
+        if (fileName == null || fileName.isEmpty()) {
+            throw new IllegalArgumentException("Invalid filename");
+        }
+        if (fileName.length() > 11) {
+            throw new IllegalArgumentException("Filename cannot be longer than 11 characters.");
+        }
+        int existingIndex = findFileEntryByName(fileName);
+        if (existingIndex >= 0) {
+            throw new Exception("File already exists");
+        }
+        int freeIndex = findFreeInodeIndex();
+        if (freeIndex == -1) {
+            throw new Exception("Maximum number of files reached");
+        }
 
-    public void createFile(String fileName) throws Exception {
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        // 4) Create new FEntry with size = 0 and firstBlock = -1 (no data yet)
+        inodeTable[freeIndex] = new FEntry(fileName, (short) 0, (short) -1);
+
+    } finally {
+        globalLock.unlock();
     }
-
-
 }
 private int allocateBlock() {
     for (int i = 0; i < MAXBLOCKS; i++) {
@@ -53,6 +71,19 @@ private int allocateBlock() {
         }
     }
     return -1; 
+}
+
+private int findFileEntryByName(String fileName) {
+    if (fileName == null) {
+        return -1;
+    }
+    for (int i = 0; i < MAXFILES; i++) {
+        if (inodeTable[i] != null &&
+                fileName.equals(inodeTable[i].getFilename())) {
+            return i;
+        }
+    }
+    return -1;
 }
 
 private int findFreeInodeIndex() {
@@ -81,7 +112,6 @@ private int[] allocateBlocks(int count) throws Exception {
     for (int i = 0; i < count; i++) {
         int b = allocateBlock();
         if (b == -1) {
-            // rollback previously allocated
             for (int j = 0; j < allocatedSoFar; j++) {
                 freeBlockList[blocks[j]] = true;
             }
@@ -113,4 +143,7 @@ private void freeBlocksForFile(FEntry entry) {
             freeBlockList[blockIndex] = true;
         }
     }
+}
+
+
 }
